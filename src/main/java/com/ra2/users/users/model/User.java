@@ -9,6 +9,7 @@ public class User {
     private String description;
     private String email;
     private String password;
+    private String image;
     private LocalDateTime ultimAcces;
     private LocalDateTime dataCreated;
     private LocalDateTime dataUpdated;
@@ -43,6 +44,12 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+    public String getImage(){
+        return image;
+    }
+    public void setImage(String image){
+        this.image = image;
+    }
     public LocalDateTime getUltimAcces() {
         return ultimAcces;
     }
@@ -64,7 +71,7 @@ public class User {
     @Override
     public String toString() {
         return "Users [id=" + id + ", name=" + name + ", description=" + description + ", email=" + email
-                + ", password=" + password + ", ultimAcces=" + ultimAcces + ", dataCreated=" + dataCreated
+                + ", password=" + password + ", image=" + image + ", ultimAcces=" + ultimAcces + ", dataCreated=" + dataCreated
                 + ", dataUpdated=" + dataUpdated + "]";
     }
     

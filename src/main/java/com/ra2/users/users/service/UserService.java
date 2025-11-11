@@ -1,39 +1,109 @@
 package com.ra2.users.users.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.ra2.users.users.model.User;
 import com.ra2.users.users.repository.UserRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
-    
 
-    public User addUser(User user){
+    @Autowired
+    private UserRepository userRepository;
+
+    public User addUser(User user) {
         LocalDateTime now = LocalDateTime.now();
-        user.setDataCreated(now); // Data de creació
-        user.setDataUpdated(now); // Data d'actualització
+        user.setDataCreated(now);
+        user.setDataUpdated(now);
         return userRepository.save(user);
     }
+
     public List<User> getAllUsers() {
-        
         return userRepository.findAll();
     }
-    public User findById(Long id) {
-        return userRepository.findById(id);
-    }
-    public boolean update(Long id, User user) {
-        return userRepository.update(id, user);
+
+    public User findById(Long userId) {
+        return userRepository.findById(userId);
     }
 
+    public boolean update(Long userId, User userDetails) {
+        User existingUser = userRepository.findById(userId);
+        if (existingUser != null) {
+            // Actualizar campos
+            existingUser.setName(userDetails.getName());
+            existingUser.setEmail(userDetails.getEmail());
+            // Actualizar otros campos según sea necesario
+            
+            // Actualizar fecha de modificación
+            existingUser.setDataUpdated(LocalDateTime.now());
+            
+            userRepository.save(existingUser);
+            return true;
+        }
+        return false;
+    }
 
+    public boolean updateName(Long userId, String name, LocalDateTime updateTime) {
+        User existingUser = userRepository.findById(userId);
+        if (existingUser != null) {
+            existingUser.setName(name);
+            existingUser.setDataUpdated(updateTime);
+            userRepository.save(existingUser);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean delete(Long userId) {
+        return userRepository.delete(userId);
+        
+    }
+    public String uploadImage(Long userId, MultipartFile image) {
+        // Consultar si existeix l'usuari amb la id
+        User existingUser = userRepository.findById(userId);
+        if (existingUser == null) {
+            throw new RuntimeException("Usuari amb ID " + userId + " no trobat");
+        }
+        try {
+            // Crear la carpeta dins del projecte 'src/main/resources/public/images'
+            Path imagesDir = Paths.get("src/main/resources/public/images");
+            if (!Files.exists(imagesDir)) {
+                Files.createDirectories(imagesDir);
+            }
+            
+            // Guardar la imatge amb un nom que identifiqui la imatge
+            String imageName = "user_" + userId + "_profile.jpg";
+            Path destinationFile = imagesDir.resolve(imageName);
+            
+            // Guardar la imatge amb NIO2
+            Files.copy(image.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            
+            // Guardar la ruta de la imatge en el camp image_path de la taula usuaris
+            String imagePath = "/images/" + imageName;
+            boolean updated = userRepository.updateImagePath(userId, imagePath, LocalDateTime.now());
+            
+            if (!updated) {
+                throw new RuntimeException("Error en guardar la ruta a la base de dades");
+            }
+            
+            // Retornar la URL de la imatge
+            return imagePath;
+            
+        } catch (IOException e) {
+            throw new RuntimeException("Error en guardar la imatge: " + e.getMessage());
+        }
+    }
+
+   
 }

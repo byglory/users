@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -22,9 +20,6 @@ public class UserController {
     
     @Autowired  
     UserService userService;
-    
-    
-    
     
     // Crea un nou usuari
     @PostMapping("/users")
@@ -51,12 +46,9 @@ public class UserController {
     }
     
     // Actualitza completament un usuari
-    @PutMapping("/users/{user_id}")
+        @PutMapping("/users/{user_id}")
     public ResponseEntity<String> updateUser(@PathVariable("user_id") Long userId, @RequestBody User user) {
-        user.setDataUpdated(LocalDateTime.now()); // Actualitza data modificació
-    
         boolean updated = userService.update(userId, user);
-    
         if (updated) {
             return ResponseEntity.ok("Usuari amb ID " + userId + " actualitzat correctament");
         } else {
@@ -69,15 +61,14 @@ public class UserController {
     public ResponseEntity<User> updateUserName(@PathVariable("user_id") Long userId, @RequestParam String name) {
         User existingUser = userService.findById(userId);
         if (existingUser == null) {
-            return ResponseEntity.ok(null); // Usuari no trobat
+            return ResponseEntity.ok(null);
         }
-        LocalDateTime now = LocalDateTime.now();
-        boolean updated = userService.updateName(userId, name, now);
+        boolean updated = userService.updateName(userId, name, LocalDateTime.now());
         if (updated) {
-            User updatedUser = userService.findById(userId); // Obtenir usuari actualitzat
+            User updatedUser = userService.findById(userId);
             return ResponseEntity.ok(updatedUser);
         }
-        return ResponseEntity.ok(null); // Error en l'actualització
+        return ResponseEntity.ok(null);
     }
     
     // Elimina un usuari
@@ -90,11 +81,19 @@ public class UserController {
             return ResponseEntity.ok("Usuari amb ID " + userId + " no existeix");
         }
     }
+    
     // Afegeix una imatge
     @PostMapping("/users/{user_id}/image")
-    public String addImageProfile(@PathVariable Long user_id, @RequestParam MultipartFile imagFile) {
-        System.out.println(imagFile);
-        return "ok";
+    public ResponseEntity<String> addImageProfile(@PathVariable("user_id") Long userId, @RequestParam("image") MultipartFile imageFile) {
+        try {
+        // Si tot va bé retornarà la URL de la imatge
+        String imageUrl = userService.uploadImage(userId, imageFile);
+        return ResponseEntity.ok(imageUrl);
+        
+    } catch (RuntimeException e) {
+        // Si hi ha algun error o no troba l'usuari mostrarà un missatge d'error
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
-    
 }
+    
+}   
