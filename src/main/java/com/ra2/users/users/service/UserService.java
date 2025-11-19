@@ -1,5 +1,7 @@
 package com.ra2.users.users.service;
 
+import java.io.BufferedReader;
+
 import com.ra2.users.users.model.User;
 import com.ra2.users.users.repository.UserRepository;
 
@@ -7,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -103,6 +106,49 @@ public class UserService {
         } catch (IOException e) {
             throw new RuntimeException("Error en guardar la imatge: " + e.getMessage());
         }
+    }
+    // Crea 10 usuaris fent servir un csv
+    public String insertAllStudentsByCsv(MultipartFile csvFile){
+        int numRegInsert = 0;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(csvFile.getInputStream()))){
+            String linia = br.readLine();
+            int numeroLinia= 0;
+            while (linia != null){
+                numRegInsert++;
+                //La primera linea identifica el orden 
+                if (numeroLinia == 0) {
+                    System.out.println("CAPCELERA"+ linia);
+                    
+                }
+                //separar por comas
+                else{
+                    String[] camps = linia.split(",");
+                    User user = new User();
+                    user.setName(camps[0]);
+                    user.setDescription(camps[1]);
+                    user.setEmail(camps[2]);
+                    user.setPassword(camps[3]);
+                    user.setImage(camps[4]);
+                    addUser(user);
+                }
+                linia = br.readLine();
+            }
+            Path csvDir = Paths.get("src/main/resources/private/csv_processed");
+            if (!Files.exists(csvDir)) {
+                Files.createDirectories(csvDir);
+            }
+            
+            // Guardar el CSV con un nombre que identifique el archivo
+            String csvName = "students_import_" + System.currentTimeMillis() + ".csv";
+            Path destinationFile = csvDir.resolve(csvName);
+            
+            // Guardar el CSV con NIO2
+            Files.copy(csvFile.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+             
+        }catch (Exception e){
+
+        }
+        return "creados" +numRegInsert + "usuarios";
     }
 
    

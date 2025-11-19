@@ -86,14 +86,17 @@ public class UserController {
     @PostMapping("/users/{user_id}/image")
     public ResponseEntity<String> addImageProfile(@PathVariable("user_id") Long userId, @RequestParam("image") MultipartFile imageFile) {
         try {
-        // Si tot va bé retornarà la URL de la imatge
-        String imageUrl = userService.uploadImage(userId, imageFile);
-        return ResponseEntity.ok(imageUrl);
+            // Si tot va bé retornarà la URL de la imatge
+            String imageUrl = userService.uploadImage(userId, imageFile);
+            return ResponseEntity.ok(imageUrl);
         
-    } catch (RuntimeException e) {
-        // Si hi ha algun error o no troba l'usuari mostrarà un missatge d'error
-        return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            // Si hi ha algun error o no troba l'usuari mostrarà un missatge d'error
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-}
-    
+    @PostMapping("/users/upload-csv")
+    public ResponseEntity<String> insertStudent(@RequestParam MultipartFile csvFile) {
+        return ResponseEntity.ok(userService.insertAllStudentsByCsv(csvFile));
+    }
 }   
