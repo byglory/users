@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 
+
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -96,7 +97,20 @@ public class UserController {
         }
     }
     @PostMapping("/users/upload-csv")
-    public ResponseEntity<String> insertStudent(@RequestParam MultipartFile csvFile) {
+    public ResponseEntity<String> insertStudentCsv(@RequestParam MultipartFile csvFile) {
         return ResponseEntity.ok(userService.insertAllStudentsByCsv(csvFile));
     }
+
+    @PostMapping("/users/upload-json")
+    public ResponseEntity<String> uploadJsonUsers(@RequestParam MultipartFile jsonFile) {
+        try {
+            // Cridar al servei per processar el JSON
+            String result = userService.insertAllUsersByJson(jsonFile);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            // Retornar error en cas d'excepció
+            return ResponseEntity.badRequest().body("Error processant el fitxer JSON: " + e.getMessage());
+        }
+    }
+    
 }   
