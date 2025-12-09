@@ -1,0 +1,18 @@
+[2025-12-09 21:24:00] INFO - UserService - getAllStudents - Consultant tots els estudiants
+[2025-12-09 21:24:07] INFO - UserService - uploadImage - Afegint la imatge aaaaaaaaaaaa.png per a l'estudiant amb id: 1
+[2025-12-09 21:24:08] INFO - UserService - uploadImage - La imatge s'ha guardat correctament. El path és: src\main\resources\public\images\user_1_profile.jpg
+[2025-12-09 21:24:26] INFO - UserService - insertAllUsersByJson - Carregant la informació del fitxer aaaa.json
+[2025-12-09 21:24:26] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'ana.garcia@email.com' for key 'users.email'
+[2025-12-09 21:24:26] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'carlos.lopez@email.com' for key 'users.email'
+[2025-12-09 21:24:26] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'maria.rodriguez@email.com' for key 'users.email'
+[2025-12-09 21:24:26] INFO - UserService - insertAllUsersByJson - S'han guardat correctament 0 registres i han donat error 3 registres
+[2025-12-09 21:24:33] INFO - UserService - getAllStudents - Consultant tots els estudiants
+[2025-12-09 21:24:44] INFO - UserService - getStudentsById - Consultant l'estudiant amb id: 2
+[2025-12-09 21:24:44] INFO - UserService - updateStudent - Modificant l'estudiant amb id: 2
+[2025-12-09 21:24:54] INFO - UserService - deleteStudent - Borrant l'estudiant amb id: 2
+[2025-12-09 21:24:54] INFO - UserService - deleteStudent - L'estudiant amb id: 2 s'ha borrat correctament
+[2025-12-09 21:25:14] INFO - UserService - insertAllUsersByJson - Carregant la informació del fitxer aaaa.json
+[2025-12-09 21:25:14] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'ana.garcia@email.com' for key 'users.email'
+[2025-12-09 21:25:14] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'carlos.lopez@email.com' for key 'users.email'
+[2025-12-09 21:25:14] ERROR - UserService - insertAllUsersByJson - Error amb usuari JSON: PreparedStatementCallback; SQL [INSERT INTO users (name, description, email, password, image_path, ultimAcces, dataCreated, dataUpdated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)]; Duplicate entry 'maria.rodriguez@email.com' for key 'users.email'
+[2025-12-09 21:25:14] INFO - UserService - insertAllUsersByJson - S'han guardat correctament 0 registres i han donat error 3 registres

@@ -1,0 +1,26 @@
+{
+  "data": {
+    "count": 3,
+    "control": "OK",
+    "users": [
+      {
+        "name": "Ana García",
+        "description": "Desarrolladora backend",
+        "email": "ana.garcia@email.com",
+        "password": "anaPass123"
+      },
+      {
+        "name": "Carlos López",
+        "description": "Diseñador UI/UX",
+        "email": "carlos.lopez@email.com",
+        "password": "carlosSecure456"
+      },
+      {
+        "name": "María Rodríguez",
+        "description": "Analista de datos",
+        "email": "maria.rodriguez@email.com",
+        "password": "mariaData789"
+      }
+    ]
+  }
+}
