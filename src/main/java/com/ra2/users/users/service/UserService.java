@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ra2.users.users.logging.UserLogging;
+import com.ra2.users.users.logging.CustomLogging; // Importem la nostra classe de logging
 import com.ra2.users.users.model.User;
 import com.ra2.users.users.repository.UserRepository;
 
@@ -30,46 +30,50 @@ public class UserService {
     private ObjectMapper mapper;
     
     @Autowired
-    UserLogging logging; // Injectem la nostra classe de logging
+    CustomLogging logging; // Injectem la classe de logging
     
     private final String CLASS_NAME = "UserService"; // Constant per al nom de la classe als logs
     
+    // --- CREATE ---
     public User addUser(User user) {
-        logging.info(CLASS_NAME, "createStudent", "Creant un estudiant"); // [cite: 135]
-
+        logging.info(CLASS_NAME, "addUser", "Creant un usuari: " + user.getName());
+        
         try {
             LocalDateTime now = LocalDateTime.now();
             user.setDataCreated(now);
             user.setDataUpdated(now);
             User savedUser = userRepository.save(user);
             
-            logging.info(CLASS_NAME, "createStudent", "Estudiant creat correctament"); // [cite: 137]
+            logging.info(CLASS_NAME, "addUser", "Usuari creat correctament");
             return savedUser;
         } catch (Exception e) {
-            // Log d'error en cas que falli (ex: índex únic duplicat)
-            logging.error(CLASS_NAME, "createStudent", "L'estudiant amb nom: " + user.getName() + ", no s'ha creat correctament. Missatge d'error: " + e.getMessage()); // [cite: 144]
+            logging.error(CLASS_NAME, "addUser", "L'usuari amb nom: " + user.getName() + ", no s'ha creat correctament. Missatge d'error: " + e.getMessage());
             throw e;
         }
     }
 
+    // --- READ ---
     public List<User> getAllUsers() {
-        logging.info(CLASS_NAME, "getAllStudents", "Consultant tots els estudiants"); // [cite: 103]
+        logging.info(CLASS_NAME, "getAllUsers", "Consultant tots els usuaris");
         return userRepository.findAll();
     }
 
     public User findById(Long userId) {
+        logging.info(CLASS_NAME, "findById", "Consultant l'usuari amb id: " + userId);
+        
         User user = userRepository.findById(userId);
+        
         if (user != null) {
-            logging.info(CLASS_NAME, "getStudentsById", "Consultant l'estudiant amb id: " + userId); // [cite: 107]
             return user;
         } else {
-            logging.error(CLASS_NAME, "getStudentsById", "L'estudiant amb id: " + userId + " no existeix"); // [cite: 132]
+            logging.error(CLASS_NAME, "findById", "L'usuari amb id: " + userId + " no existeix");
             return null;
         }
     }
 
+    // --- UPDATE ---
     public boolean update(Long userId, User userDetails) {
-        logging.info(CLASS_NAME, "updateAllStudent", "Modificant l'estudiant amb id: " + userId); // [cite: 153]
+        logging.info(CLASS_NAME, "update", "Modificant l'usuari amb id: " + userId);
         
         User existingUser = userRepository.findById(userId);
         if (existingUser != null) {
@@ -77,76 +81,73 @@ public class UserService {
             existingUser.setName(userDetails.getName());
             existingUser.setEmail(userDetails.getEmail());
             // Actualitzar altres camps segons sigui necessari
-            // Actualitzar data de modificació
             existingUser.setDataUpdated(LocalDateTime.now());       
-            userRepository.save(existingUser);
             
-            logging.info(CLASS_NAME, "updateAllStudent", "Estudiant modificat correctament"); // [cite: 155]
+            userRepository.save(existingUser); // Nota: Si el save fa insert, hauries d'usar un mètode update específic al repositori, però aquí seguim la teva lògica.
+            
+            logging.info(CLASS_NAME, "update", "Usuari modificat correctament");
             return true;
         }
         
-        logging.error(CLASS_NAME, "updateAllStudent", "L'estudiant amb id: " + userId + " no existeix"); // [cite: 162]
+        logging.error(CLASS_NAME, "update", "L'usuari amb id: " + userId + " no existeix");
         return false;
     }
 
     public boolean updateName(Long userId, String name, LocalDateTime updateTime) {
-        logging.info(CLASS_NAME, "updateStudent", "Modificant l'estudiant amb id: " + userId); // [cite: 171]
+        logging.info(CLASS_NAME, "updateName", "Modificant el nom de l'usuari amb id: " + userId);
         
         User existingUser = userRepository.findById(userId);
         if (existingUser != null) {
             existingUser.setName(name);
             existingUser.setDataUpdated(updateTime);
-            userRepository.save(existingUser);
+            userRepository.save(existingUser); // Mateixa nota sobre l'update vs save
             
-            logging.info(CLASS_NAME, "updateStudent", "Estudiant modificat correctament"); // [cite: 173]
+            logging.info(CLASS_NAME, "updateName", "Nom modificat correctament");
             return true;
         }
         
-        logging.error(CLASS_NAME, "updateStudent", "L'estudiant amb id: " + userId + " no existeix"); // [cite: 181]
+        logging.error(CLASS_NAME, "updateName", "L'usuari amb id: " + userId + " no existeix");
         return false;
     }
 
+    // --- DELETE ---
     public boolean delete(Long userId) {
-        logging.info(CLASS_NAME, "deleteStudent", "Borrant l'estudiant amb id: " + userId); // [cite: 188]
+        logging.info(CLASS_NAME, "delete", "Esborrant l'usuari amb id: " + userId);
         
-        // Comprovem abans si existeix per fer el log correcte d'error si cal
+        // Comprovem primer si existeix per fer el log d'error si cal
         if (userRepository.findById(userId) == null) {
-            logging.error(CLASS_NAME, "deleteStudent", "L'estudiant amb id: " + userId + " no existeix"); // [cite: 201]
+            logging.error(CLASS_NAME, "delete", "L'usuari amb id: " + userId + " no existeix");
             return false;
         }
 
         boolean reg = userRepository.delete(userId);
         if (reg) {
-            logging.info(CLASS_NAME, "deleteStudent", "L'estudiant amb id: " + userId + " s'ha borrat correctament"); // [cite: 192]
+            logging.info(CLASS_NAME, "delete", "L'usuari amb id: " + userId + " s'ha esborrat correctament");
         }
         return reg;
     }
    
+    // --- UPLOAD IMAGE ---
     public String uploadImage(Long userId, MultipartFile image) {
-        logging.info(CLASS_NAME, "uploadImage", "Afegint la imatge " + image.getOriginalFilename() + " per a l'estudiant amb id: " + userId); // [cite: 221]
+        logging.info(CLASS_NAME, "uploadImage", "Afegint la imatge " + image.getOriginalFilename() + " per a l'usuari amb id: " + userId);
         
-        // Consultar si existeix l'usuari amb la id
         User existingUser = userRepository.findById(userId);
         if (existingUser == null) {
-            logging.error(CLASS_NAME, "uploadImage", "L'usuari amb id " + userId + " no existeix"); // [cite: 225]
+            logging.error(CLASS_NAME, "uploadImage", "L'usuari amb id " + userId + " no existeix");
             throw new RuntimeException("Usuari amb ID " + userId + " no trobat");
         }
         
         try {
-            // Crear la carpeta dins del projecte 'src/main/resources/public/images'
             Path imagesDir = Paths.get("src/main/resources/public/images");
             if (!Files.exists(imagesDir)) {
                 Files.createDirectories(imagesDir);
             }
             
-            // Guardar la imatge amb un nom que identifiqui la imatge
             String imageName = "user_" + userId + "_profile.jpg";
             Path destinationFile = imagesDir.resolve(imageName);
             
-            // Guardar la imatge amb NIO2
             Files.copy(image.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
             
-            // Guardar la ruta de la imatge en el camp image_path de la taula usuaris
             String imagePath = "/images/" + imageName;
             boolean updated = userRepository.updateImagePath(userId, imagePath, LocalDateTime.now());
             
@@ -154,20 +155,18 @@ public class UserService {
                 throw new RuntimeException("Error en guardar la ruta a la base de dades");
             }
             
-            logging.info(CLASS_NAME, "uploadImage", "La imatge s'ha guardat correctament. El path és: " + destinationFile.toString()); // [cite: 222]
-            
-            // Retornar la URL de la imatge
+            logging.info(CLASS_NAME, "uploadImage", "La imatge s'ha guardat correctament. El path és: " + destinationFile.toString());
             return imagePath;
             
         } catch (IOException e) {
-            logging.error(CLASS_NAME, "uploadImage", "Error guardant imatge: " + e.getMessage());
+            logging.error(CLASS_NAME, "uploadImage", "Error guardant la imatge: " + e.getMessage());
             throw new RuntimeException("Error en guardar la imatge: " + e.getMessage());
         }
     }
 
-    // Crea 10 usuaris fent servir un csv
+    // --- CSV IMPORT ---
     public String insertAllStudentsByCsv(MultipartFile csvFile) {
-        logging.info(CLASS_NAME, "insertAllStudentByCsv", "Carregant la informació del fitxer " + csvFile.getOriginalFilename()); // [cite: 209]
+        logging.info(CLASS_NAME, "insertAllStudentsByCsv", "Carregant la informació del fitxer " + csvFile.getOriginalFilename());
 
         int numRegInsert = 0;
         int numErrors = 0;
@@ -177,13 +176,9 @@ public class UserService {
             String linia;
             
             while ((linia = br.readLine()) != null) {
-                // Saltar línies buides
-                if (linia.trim().isEmpty()) {
-                    continue;
-                }
+                if (linia.trim().isEmpty()) continue;
                 
                 if (numeroLinia == 0) {
-                    // Validar capçalera
                     if (!linia.equals("name,description,email,password")) {
                         return "Format de CSV incorrecte. Capçalera esperada: name,description,email,password";
                     }
@@ -191,13 +186,10 @@ public class UserService {
                     continue;
                 }
                 
-                // Separar per comes
                 String[] camps = linia.split(",");
-                
-                // Validar que tingui exactament 4 camps
                 if (camps.length != 4) {
                     System.err.println("Línia ignorada - camps insuficients: " + linia);
-                    numErrors++; // Comptem error
+                    numErrors++;
                     continue;
                 }
                 
@@ -208,7 +200,7 @@ public class UserService {
                     user.setEmail(camps[2].trim());
                     user.setPassword(camps[3].trim());
                     
-                    // Guardem manualment per evitar duplicar logs de 'addUser'
+                    // Fem el save manualment per evitar duplicar logs si cridéssim addUser()
                     LocalDateTime now = LocalDateTime.now();
                     user.setDataCreated(now);
                     user.setDataUpdated(now);
@@ -218,35 +210,30 @@ public class UserService {
                     
                 } catch (Exception e) {
                     numErrors++;
-                    // Log error específic per línia
-                    logging.error(CLASS_NAME, "insertAllStudentByCsv", "Error en la línia " + numeroLinia + " del fitxer. Missatge d'error: " + e.getMessage()); // [cite: 212]
+                    logging.error(CLASS_NAME, "insertAllStudentsByCsv", "Error en la línia " + numeroLinia + ". Missatge: " + e.getMessage());
                 }
-                
                 numeroLinia++;
             }
             
-            // Guardar el CSV processat (opcional)
+            // Guardar còpia del CSV (opcional)
             Path csvDir = Paths.get("src/main/resources/private/csv_processed");
-            if (!Files.exists(csvDir)) {
-                Files.createDirectories(csvDir);
-            }
+            if (!Files.exists(csvDir)) Files.createDirectories(csvDir);
             
             String csvName = "students_import_" + System.currentTimeMillis() + ".csv";
             Path destinationFile = csvDir.resolve(csvName);
             Files.copy(csvFile.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
             
         } catch (Exception e) {
-            logging.error(CLASS_NAME, "insertAllStudentByCsv", "Error general processant CSV: " + e.getMessage());
+            logging.error(CLASS_NAME, "insertAllStudentsByCsv", "Error general CSV: " + e.getMessage());
             e.printStackTrace();
             return "Error processant CSV: " + e.getMessage();
         }
         
-        // Log final resum
-        logging.info(CLASS_NAME, "insertAllStudentByCsv", "S'han guardat correctament " + numRegInsert + " registres i han donat error " + numErrors + " registres"); // [cite: 210]
-        
+        logging.info(CLASS_NAME, "insertAllStudentsByCsv", "S'han guardat correctament " + numRegInsert + " registres i han donat error " + numErrors + " registres");
         return "Creats " + numRegInsert + " usuaris correctament";
     }
 
+    // --- JSON IMPORT ---
     public String insertAllUsersByJson(MultipartFile jsonFile) {
         logging.info(CLASS_NAME, "insertAllUsersByJson", "Carregant la informació del fitxer " + jsonFile.getOriginalFilename());
 
@@ -254,71 +241,42 @@ public class UserService {
         int numErrors = 0;
         
         try {
-            // Llegir el fitxer JSON i parsejar-lo
             JsonNode arrel = mapper.readTree(jsonFile.getInputStream());
-            
-            // Accedir al node "data" del JSON
             JsonNode dataNode = arrel.path("data");
             
-            // Obtenir els valors de control i count
             String control = dataNode.path("control").asText();
             int count = dataNode.path("count").asInt();
-            
-            // Accedir a l'array d'usuaris
             JsonNode usersNode = dataNode.path("users");
             
-            // Validar que el control sigui "OK"
-            if (!"OK".equals(control)) {
-                return "Error: El control no és 'OK'";
-            }
+            if (!"OK".equals(control)) return "Error: El control no és 'OK'";
+            if (count != usersNode.size()) return "Error: El count no coincideix";
             
-            // Validar que el count coincideixi amb el nombre d'usuaris
-            if (count != usersNode.size()) {
-                return "Error: El count (" + count + ") no coincideix amb el nombre d'usuaris (" + usersNode.size() + ")";
-            }
-            
-            // Recórrer cada usuari de l'array
             for (JsonNode userNode : usersNode) {
                 try {
-                    // Obtenir les dades de cada usuari
-                    String name = userNode.path("name").asText();
-                    String description = userNode.path("description").asText();
-                    String email = userNode.path("email").asText();
-                    String password = userNode.path("password").asText();
-                    
-                    // Crear nou usuari
                     User user = new User();
-                    user.setName(name);
-                    user.setDescription(description);
-                    user.setEmail(email);
-                    user.setPassword(password);
+                    user.setName(userNode.path("name").asText());
+                    user.setDescription(userNode.path("description").asText());
+                    user.setEmail(userNode.path("email").asText());
+                    user.setPassword(userNode.path("password").asText());
                     
-                    // Guardar usuari a la base de dades
                     LocalDateTime now = LocalDateTime.now();
                     user.setDataCreated(now);
                     user.setDataUpdated(now);
                     userRepository.save(user);
                     
                     numRegInsert++;
-                    
                 } catch (Exception e) {
                     numErrors++;
-                    System.err.println("Error creant usuari des de JSON: " + userNode);
                     logging.error(CLASS_NAME, "insertAllUsersByJson", "Error amb usuari JSON: " + e.getMessage());
                 }
             }
             
-            // Guardar el fitxer JSON a la carpeta de processats
+            // Guardar còpia del JSON (opcional)
             Path jsonDir = Paths.get("src/main/resources/private/json_processed");
-            if (!Files.exists(jsonDir)) {
-                Files.createDirectories(jsonDir);
-            }
+            if (!Files.exists(jsonDir)) Files.createDirectories(jsonDir);
             
-            // Generar nom únic per al fitxer
             String jsonName = "users_import_" + System.currentTimeMillis() + ".json";
             Path destinationFile = jsonDir.resolve(jsonName);
-            
-            // Copiar el fitxer al directori de processats
             Files.copy(jsonFile.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
                 
         } catch (Exception e) {
@@ -328,7 +286,6 @@ public class UserService {
         }
         
         logging.info(CLASS_NAME, "insertAllUsersByJson", "S'han guardat correctament " + numRegInsert + " registres i han donat error " + numErrors + " registres");
-
         return "Creats " + numRegInsert + " usuaris correctament";
     }
 }
